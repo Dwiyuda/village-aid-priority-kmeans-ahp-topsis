@@ -38,10 +38,13 @@ save weights once CR exceeds 0.10.
 | Export | CSV and PDF reports following the active weights |
 
 ```bash
+pip install -r requirements.txt
 cd web
-pip install flask fpdf2 pandas numpy matplotlib
 python app.py        # http://localhost:5000
 ```
+
+Tested on Python 3.12: all web pages, CSV/PDF export, the three experiment scripts and the
+seven notebooks run end to end and reproduce the numbers above.
 
 ## Analysis pipeline
 

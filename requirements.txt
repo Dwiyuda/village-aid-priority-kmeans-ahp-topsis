@@ -1,0 +1,13 @@
+# Tested with Python 3.12 (web app, 3 experiment scripts, and all 7 notebooks)
+flask>=3.1
+fpdf2>=2.8
+pandas>=2.2
+numpy>=1.26
+matplotlib>=3.9
+openpyxl>=3.1
+scikit-learn>=1.5
+scipy>=1.13
+seaborn>=0.13
+# only needed to run the notebooks headless
+nbconvert>=7.16
+ipykernel>=6.29
