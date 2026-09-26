@@ -1,0 +1,22 @@
+{
+  "best_algorithm": "K-Means",
+  "k_optimal": 3,
+  "votes_kmeans": 3,
+  "votes_hier": 0,
+  "kmeans_metrics": {
+    "algorithm": "K-Means",
+    "k": 3,
+    "silhouette_score": 0.181573,
+    "davies_bouldin_score": 1.81449,
+    "calinski_harabasz_score": 101.595339,
+    "inertia": 1912.1881
+  },
+  "hier_metrics": {
+    "algorithm": "Hierarchical",
+    "k": 3,
+    "linkage": "ward",
+    "silhouette_score": 0.12886,
+    "davies_bouldin_score": 1.971099,
+    "calinski_harabasz_score": 85.099016
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "catatan": "Dua metode penentuan k yang DIKLAIM/disarankan tapi belum pernah benar-benar dijalankan di NB03/NB04 atau eksperimen sebelumnya.",
+  "k_dari_gap_dendrogram_nyata": 2,
+  "k_dari_gap_statistic": 4,
+  "k_dari_silhouette_kmeans_sebelumnya": 2,
+  "k_dari_silhouette_hierarchical_sebelumnya": 2,
+  "k_yang_dipakai_di_notebook_resmi": 3,
+  "ringkasan": "Gap dendrogram nyata -> k=2. Gap Statistic -> k=4. Bandingkan dengan k=2 (Silhouette, eksperimen 01) dan k=3 (notebook resmi, hardcoded)."
+}

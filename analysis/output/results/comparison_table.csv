@@ -1,0 +1,4 @@
+Metrik,K-Means,Hierarchical,Pemenang,best_algorithm
+Silhouette Score (↑),0.1816,0.1289,K-Means ✓,K-Means
+Davies-Bouldin Index (↓),1.8145,1.9711,K-Means ✓,K-Means
+Calinski-Harabasz Index (↑),101.6,85.1,K-Means ✓,K-Means

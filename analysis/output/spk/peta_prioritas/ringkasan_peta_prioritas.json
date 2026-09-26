@@ -1,0 +1,41 @@
+{
+  "sumber_data": "20 Juli 2026",
+  "jumlah_desa_dianalisis": 371,
+  "distribusi_zona": {
+    "Kemiskinan Tinggi": 136,
+    "Kemiskinan Rendah": 126,
+    "Kemiskinan Sedang": 109
+  },
+  "distribusi_jenis_masalah": {
+    "Ekonomi": 278,
+    "Administratif/Cakupan": 93
+  },
+  "top5_desa_prioritas": [
+    {
+      "KECAMATAN": "Kikim Selatan",
+      "KELURAHAN": "Beringin Janggut",
+      "skor_topsis_ahp": 0.613425
+    },
+    {
+      "KECAMATAN": "Muarapayang",
+      "KELURAHAN": "Bandu Agung",
+      "skor_topsis_ahp": 0.600643
+    },
+    {
+      "KECAMATAN": "Jarai",
+      "KELURAHAN": "Lubuk Saung",
+      "skor_topsis_ahp": 0.543371
+    },
+    {
+      "KECAMATAN": "Tanjungtebat",
+      "KELURAHAN": "Padang Perigi",
+      "skor_topsis_ahp": 0.52036
+    },
+    {
+      "KECAMATAN": "Kikim Selatan",
+      "KELURAHAN": "Keban Raya",
+      "skor_topsis_ahp": 0.503846
+    }
+  ],
+  "anomali": "Talang Jawa (Kec. Lahat) — perlu survei lapangan"
+}

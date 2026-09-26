@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block judul %}TOPSIS vs SAW{% endblock %}
+
+{% block isi %}
+<div class="head">
+  <h2>Perbandingan TOPSIS dan SAW</h2>
+  <p>Dua metode perankingan dijalankan pada bobot AHP yang sama, lalu hasilnya dibandingkan untuk menguji ketahanan peringkat.</p>
+</div>
+
+<div class="grid g4">
+  <div class="stat"><div class="lbl">Korelasi peringkat</div><div class="val">{{ '%.4f'|format(info.korelasi) }}</div><div class="sup">makin dekat 1 makin sepakat</div></div>
+  <div class="stat"><div class="lbl">Kesepakatan 20 teratas</div><div class="val">{{ top20_sama }}/20</div><div class="sup">desa yang sama di kedua metode</div></div>
+  <div class="stat"><div class="lbl">Daya pemisah TOPSIS</div><div class="val">{{ '%.4f'|format(cv_topsis) }}</div><div class="sup">koefisien variasi skor</div></div>
+  <div class="stat"><div class="lbl">Daya pemisah SAW</div><div class="val">{{ '%.4f'|format(cv_saw) }}</div><div class="sup">koefisien variasi skor</div></div>
+</div>
+
+<div class="card">
+  <h3>Metode yang dipilih: TOPSIS</h3>
+  <div class="mini">
+    Kedua metode sangat sepakat (korelasi {{ '%.4f'|format(info.korelasi) }}), sehingga peringkat yang dihasilkan
+    tidak bergantung pada pilihan metode. TOPSIS dipakai sebagai metode utama karena daya pemisah skornya lebih
+    tinggi ({{ '%.4f'|format(cv_topsis) }} berbanding {{ '%.4f'|format(cv_saw) }}), sehingga perbedaan antar desa
+    lebih mudah dibedakan, dan karena TOPSIS menangani kriteria bertipe <em>cost</em> secara lebih alami.
+  </div>
+</div>
+
+<div class="card">
+  <h3>Lima belas desa teratas menurut kedua metode</h3>
+  <div class="ket">Kolom selisih menunjukkan seberapa jauh kedua metode berbeda menilai desa yang sama.</div>
+  <table>
+    <thead>
+      <tr><th>Desa</th><th>Kecamatan</th>
+        <th style="text-align:right">Peringkat TOPSIS</th>
+        <th style="text-align:right">Peringkat SAW</th>
+        <th style="text-align:right">Selisih</th></tr>
+    </thead>
+    <tbody>
+    {% for r in rows %}
+      <tr>
+        <td><a href="{{ url_for('detail', kec=r.KECAMATAN, desa=r.KELURAHAN) }}">{{ r.KELURAHAN }}</a></td>
+        <td class="mut">{{ r.KECAMATAN }}</td>
+        <td class="num" style="text-align:right;font-weight:600">{{ r.rank_topsis }}</td>
+        <td class="num" style="text-align:right">{{ r.rank_saw }}</td>
+        <td class="num" style="text-align:right">{{ (r.rank_topsis - r.rank_saw)|abs }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h3>Desa dengan perbedaan penilaian terbesar</h3>
+  <div class="ket">Desa yang paling berbeda penilaiannya antara kedua metode, layak diperiksa profilnya.</div>
+  <table>
+    <thead><tr><th>Desa</th><th>Kecamatan</th><th>Zona</th>
+      <th style="text-align:right">TOPSIS</th><th style="text-align:right">SAW</th><th style="text-align:right">Selisih</th></tr></thead>
+    <tbody>
+    {% for r in beda %}
+      <tr>
+        <td><a href="{{ url_for('detail', kec=r.KECAMATAN, desa=r.KELURAHAN) }}">{{ r.KELURAHAN }}</a></td>
+        <td class="mut">{{ r.KECAMATAN }}</td>
+        <td>{% if r.zona=='Kemiskinan Tinggi' %}<span class="b b-tinggi">Tinggi</span>
+            {% elif r.zona=='Kemiskinan Sedang' %}<span class="b b-sedang">Sedang</span>
+            {% else %}<span class="b b-rendah">Rendah</span>{% endif %}</td>
+        <td class="num" style="text-align:right">{{ r.rank_topsis }}</td>
+        <td class="num" style="text-align:right">{{ r.rank_saw }}</td>
+        <td class="num" style="text-align:right;font-weight:600">{{ r.selisih }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

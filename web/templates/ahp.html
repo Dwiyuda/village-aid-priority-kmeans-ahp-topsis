@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block judul %}Pembobotan AHP{% endblock %}
+
+{% block kepala %}
+<style>
+.pgrup{margin-top:16px}
+.pgrup:first-child{margin-top:0}
+.pgrup .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--teks-3);font-weight:600;margin-bottom:9px}
+.pgrid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(212px,1fr))}
+.pbtn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;
+  padding:11px 13px;line-height:1.35;width:100%}
+.pbtn .nm{font-size:13px;font-weight:600;color:var(--teks)}
+.pbtn .ds{font-size:11px;color:var(--teks-2)}
+.pbtn .crm{font-size:11px;color:var(--teks-3);font-variant-numeric:tabular-nums;margin-top:2px}
+.pbtn.on{border-color:var(--primer);background:var(--primer-terang)}
+.pbtn.on .nm{color:var(--primer-gelap)}
+.pbtn.on .ds,.pbtn.on .crm{color:var(--primer-gelap);opacity:.85}
+/* slider read-only (mode tampilan) */
+input[type=range]:disabled{cursor:default;opacity:1}
+input[type=range]:disabled::-webkit-slider-thumb{background:#94A3B8}
+input[type=range]:disabled::-moz-range-thumb{background:#94A3B8}
+</style>
+{% endblock %}
+
+{% block isi %}
+<div class="head">
+  <h2>Pembobotan Kriteria dengan AHP</h2>
+  <p>Pilih salah satu dari 11 pola bobot yang sudah teruji konsisten. Kurva di bawah menampilkan bobotnya; aktifkan mode lanjutan bila ingin menyusun bobot sendiri.</p>
+</div>
+
+<div class="cr">
+  <div>
+    <div class="mini">Rasio konsistensi (CR) &middot; pola: <strong id="nm-aktif">{{ nama_preset }}</strong></div>
+    <div class="v" id="cr-val">{{ '%.4f'|format(info.cr) }}</div>
+  </div>
+  <div style="text-align:right">
+    <div class="mini" id="cr-lm">&lambda;maks {{ '%.4f'|format(info.lambda_max) }} &middot; CI {{ '%.4f'|format(info.ci) }}</div>
+    <div style="margin-top:5px"><span class="p ok" id="cr-badge">Konsisten</span></div>
+  </div>
+</div>
+
+<form method="post" id="form-ahp">
+  <div class="card">
+    <h3>Pilih pola pembobotan</h3>
+    <div class="ket">Sebelas pola kebijakan, semuanya sudah lolos uji konsistensi (CR &lt; 0,10). Klik salah satu untuk menerapkannya &mdash; peringkat 371 desa langsung dihitung ulang.</div>
+    {% for judul, items in preset_grup %}
+    <div class="pgrup">
+      <div class="lbl">{{ judul }}</div>
+      <div class="pgrid">
+        {% for key, nama, desk in items %}
+        <button type="submit" name="aksi" value="{{ key }}" class="pbtn {% if preset==key %}on{% endif %}">
+          <span class="nm">{{ nama }}</span>
+          <span class="ds">{{ desk }}</span>
+          <span class="crm">CR {{ '%.4f'|format(preset_cr[key]) }}</span>
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="card">
+    <div class="tools" style="margin-bottom:0">
+      <h3 style="margin:0">Kurva bobot pola aktif</h3>
+      <div class="spacer"></div>
+      <span class="mini" id="mode-ket">Hanya tampilan &mdash; kurva menunjukkan bobot pola terpilih.</span>
+      <button type="button" id="btn-mode" class="btn">Edit manual</button>
+    </div>
+  </div>
+
+  {% for g in grup %}
+  <div class="card">
+    <h3>{{ g.induk }} dibandingkan dengan</h3>
+    <div class="ket">Geser ke kiri bila {{ g.induk }} lebih penting, ke kanan bila lawannya lebih penting.</div>
+    {% for p in g['items'] %}
+    <div class="pair">
+      <div class="row">
+        <span class="kiri">{{ p.kiri }}</span>
+        <input type="range" min="-8" max="8" step="1" name="n{{ p.idx }}" id="s{{ p.idx }}"
+               value="{{ nilai[p.idx] }}" data-i="{{ p.i }}" data-j="{{ p.j }}"
+               oninput="ubah({{ p.idx }})" disabled>
+        <span class="kanan">{{ p.kanan }}</span>
+      </div>
+      <div class="ket" id="t{{ p.idx }}"></div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+
+  <div class="card">
+    <h3>Bobot hasil perhitungan</h3>
+    <div class="ket">Bobot tiap kriteria untuk pola aktif. Total selalu 100%.</div>
+    <div id="bobot"></div>
+    <div class="tools" id="baris-simpan" style="margin-top:16px;margin-bottom:0;display:none">
+      <button type="submit" name="aksi" value="simpan" class="btn-p" id="btn-simpan">
+        Simpan penilaian manual dan hitung ulang
+      </button>
+      <span class="mini" id="peringatan"></span>
+    </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block skrip %}
+<script>
+const LABEL = {{ labels|tojson }};
+const N = LABEL.length, RI = 1.32;
+const A = Array.from({length:N}, () => Array(N).fill(1));
+
+const rasio = v => v >= 0 ? v + 1 : 1 / (1 - v);
+
+function kalimat(v, a, b){
+  if (v === 0) return a + ' dan ' + b + ' sama penting';
+  const r = Math.round(rasio(Math.abs(v)));
+  return (v > 0 ? a : b) + ' lebih penting (' + r + '×)';
+}
+
+function hitung(){
+  const kol = Array(N).fill(0);
+  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) kol[j] += A[i][j];
+  const w = Array(N).fill(0);
+  for (let i = 0; i < N; i++){
+    let s = 0;
+    for (let j = 0; j < N; j++) s += A[i][j] / kol[j];
+    w[i] = s / N;
+  }
+  let lm = 0;
+  for (let i = 0; i < N; i++){
+    let s = 0;
+    for (let j = 0; j < N; j++) s += A[i][j] * w[j];
+    lm += s / w[i];
+  }
+  lm /= N;
+  const ci = (lm - N) / (N - 1), cr = ci / RI;
+
+  document.getElementById('cr-val').textContent = cr.toFixed(4);
+  document.getElementById('cr-lm').textContent =
+    'λmaks ' + lm.toFixed(4) + ' · CI ' + ci.toFixed(4);
+
+  const badge = document.getElementById('cr-badge'), ok = cr < 0.10;
+  badge.textContent = ok ? 'Konsisten' : 'Tidak konsisten';
+  badge.className = 'p ' + (ok ? 'ok' : 'no');
+  document.getElementById('peringatan').textContent =
+    ok ? '' : 'CR harus di bawah 0,10 sebelum bisa disimpan.';
+
+  const maks = Math.max(...w);
+  document.getElementById('bobot').innerHTML = w.map((x, i) =>
+    '<div class="bar"><span class="n">' + LABEL[i] + '</span>' +
+    '<span class="t"><span class="f" style="width:' + (x / maks * 100) + '%"></span></span>' +
+    '<span class="p">' + (x * 100).toFixed(1) + '%</span></div>').join('');
+}
+
+function ubah(k){
+  const el = document.getElementById('s' + k);
+  const i = +el.dataset.i, j = +el.dataset.j, v = +el.value;
+  A[i][j] = rasio(v);
+  A[j][i] = 1 / rasio(v);
+  document.getElementById('t' + k).textContent = kalimat(v, LABEL[i], LABEL[j]);
+  document.getElementById('nm-aktif').textContent = 'Penilaian manual (belum disimpan)';
+  hitung();
+}
+
+document.querySelectorAll('input[type=range]').forEach(el => {
+  const i = +el.dataset.i, j = +el.dataset.j, v = +el.value;
+  A[i][j] = rasio(v);
+  A[j][i] = 1 / rasio(v);
+  document.getElementById('t' + el.id.slice(1)).textContent = kalimat(v, LABEL[i], LABEL[j]);
+});
+hitung();
+
+// ── Mode lanjutan: buka kunci slider + tampilkan tombol simpan ────────────
+let manual = false;
+const btnMode = document.getElementById('btn-mode');
+btnMode.addEventListener('click', () => {
+  manual = !manual;
+  document.querySelectorAll('#form-ahp input[type=range]').forEach(el => el.disabled = !manual);
+  document.getElementById('baris-simpan').style.display = manual ? 'flex' : 'none';
+  document.getElementById('mode-ket').textContent = manual
+    ? 'Mode lanjutan aktif — geser slider untuk menyusun bobot sendiri; CR dicek otomatis.'
+    : 'Hanya tampilan — kurva menunjukkan bobot pola terpilih.';
+  btnMode.textContent = manual ? 'Kunci lagi (mode tampilan)' : 'Edit manual';
+  btnMode.classList.toggle('btn-p', manual);
+});
+</script>
+{% endblock %}

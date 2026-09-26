@@ -1,0 +1,12 @@
+{
+  "jumlah_desa": 371,
+  "metode": [
+    "SAW",
+    "TOPSIS"
+  ],
+  "korelasi_spearman": 0.9479,
+  "kesepakatan_top20": "13/20",
+  "cv_saw": 0.2272,
+  "cv_topsis": 0.2733,
+  "catatan_bobot": "Bobot ilustrasi; finalkan via AHP / wawancara Dinas Sosial."
+}

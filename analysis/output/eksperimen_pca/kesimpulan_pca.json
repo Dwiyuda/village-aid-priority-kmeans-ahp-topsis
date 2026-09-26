@@ -1,0 +1,13 @@
+{
+  "n_components_pca": 6,
+  "variance_dijelaskan_pca": 0.9501,
+  "silhouette_terbaik_tanpa_pca": 0.234013,
+  "silhouette_terbaik_dengan_pca": 0.246047,
+  "pca_meningkatkan_hasil": true,
+  "kombinasi_terbaik_keseluruhan": {
+    "algoritma": "K-Means",
+    "fitur": "Dengan PCA",
+    "k": 2,
+    "silhouette": 0.246047
+  }
+}

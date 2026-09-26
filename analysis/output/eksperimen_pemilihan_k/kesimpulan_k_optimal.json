@@ -1,0 +1,9 @@
+{
+  "catatan": "k dipilih otomatis dari Silhouette Score tertinggi (bukan manual/visual)",
+  "k_optimal_kmeans": 2,
+  "silhouette_kmeans_terbaik": 0.234013,
+  "k_optimal_hierarchical": 2,
+  "silhouette_hierarchical_terbaik": 0.198058,
+  "k_yang_dipakai_di_notebook_resmi": 3,
+  "catatan_perbandingan": "Bandingkan k_optimal di atas dengan k=3 yang dipakai di NB03/NB04. Jika berbeda, k=3 di notebook resmi adalah keputusan manual (pertimbangan interpretability), bukan hasil murni data."
+}

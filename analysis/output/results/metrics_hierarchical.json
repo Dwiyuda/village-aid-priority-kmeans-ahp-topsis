@@ -1,0 +1,8 @@
+{
+  "algorithm": "Hierarchical",
+  "k": 3,
+  "linkage": "ward",
+  "silhouette_score": 0.12886,
+  "davies_bouldin_score": 1.971099,
+  "calinski_harabasz_score": 85.099016
+}

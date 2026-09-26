@@ -1,0 +1,19 @@
+{
+  "lambda_max": 7.0789,
+  "CI": 0.0131,
+  "RI": 1.32,
+  "CR": 0.01,
+  "konsisten": true,
+  "bobot_ahp": {
+    "pct_desil1": 0.3047,
+    "pct_desil2": 0.1858,
+    "pct_desil3": 0.1078,
+    "pct_desil4": 0.0652,
+    "pct_desil5": 0.0427,
+    "pct_desil6_10": 0.1078,
+    "pct_belum_prmk": 0.1858
+  },
+  "korelasi_topsis_ahp_vs_ilustrasi": 0.9885,
+  "korelasi_topsis_vs_saw_bobotAHP": 0.9339,
+  "catatan": "Perbandingan berpasangan adalah template; wajib divalidasi Dinas Sosial."
+}

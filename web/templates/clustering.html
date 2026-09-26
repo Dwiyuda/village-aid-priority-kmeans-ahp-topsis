@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block judul %}Hasil Clustering{% endblock %}
+
+{% block isi %}
+<div class="head">
+  <h2>Hasil Clustering</h2>
+  <p>Pengelompokan 371 desa dengan K-Means dan Hierarchical Ward, k = 3. Tahap ini dijalankan terpisah dan hasilnya menjadi masukan bagi pendukung keputusan.</p>
+</div>
+
+<div class="card">
+  <h3>Perbandingan algoritma</h3>
+  <div class="ket">Tiga metrik evaluasi internal. K-Means unggul pada ketiganya, sehingga hasilnya yang dipakai untuk penentuan zona.</div>
+  <table>
+    <thead><tr><th>Metrik</th><th style="text-align:right">K-Means</th><th style="text-align:right">Hierarchical Ward</th><th>Arah optimal</th><th>Unggul</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Silhouette Score</td>
+        <td class="num" style="text-align:right;font-weight:600">{{ '%.4f'|format(m.kmeans.silhouette_score) }}</td>
+        <td class="num" style="text-align:right">{{ '%.4f'|format(m.hier.silhouette_score) }}</td>
+        <td class="mut">makin tinggi makin baik</td>
+        <td><span class="b b-eko">K-Means</span></td>
+      </tr>
+      <tr>
+        <td>Davies-Bouldin Index</td>
+        <td class="num" style="text-align:right;font-weight:600">{{ '%.4f'|format(m.kmeans.davies_bouldin_score) }}</td>
+        <td class="num" style="text-align:right">{{ '%.4f'|format(m.hier.davies_bouldin_score) }}</td>
+        <td class="mut">makin rendah makin baik</td>
+        <td><span class="b b-eko">K-Means</span></td>
+      </tr>
+      <tr>
+        <td>Calinski-Harabasz Index</td>
+        <td class="num" style="text-align:right;font-weight:600">{{ '%.4f'|format(m.kmeans.calinski_harabasz_score) }}</td>
+        <td class="num" style="text-align:right">{{ '%.4f'|format(m.hier.calinski_harabasz_score) }}</td>
+        <td class="mut">makin tinggi makin baik</td>
+        <td><span class="b b-eko">K-Means</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="mini" style="margin-top:12px">
+    Nilai Silhouette {{ '%.4f'|format(m.kmeans.silhouette_score) }} tergolong rendah. Ini bukan kegagalan metode,
+    melainkan temuan bahwa kemiskinan bersifat gradasi, bukan kategori yang terpisah tegas. Justru temuan inilah
+    yang mendasari penggunaan pendekatan perankingan pada tahap berikutnya.
+  </div>
+</div>
+
+<div class="card">
+  <h3>Profil rata-rata tiap zona</h3>
+  <div class="ket">Rata-rata proporsi keluarga per kategori, dalam persen.</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Zona</th><th style="text-align:right">Jumlah</th>
+        {% for l in labels %}<th style="text-align:right">{{ l }}</th>{% endfor %}
+        <th style="text-align:right">Nonaktif</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for p in profil %}
+      <tr>
+        <td>{% if p.zona=='Kemiskinan Tinggi' %}<span class="b b-tinggi">Tinggi</span>
+            {% elif p.zona=='Kemiskinan Sedang' %}<span class="b b-sedang">Sedang</span>
+            {% else %}<span class="b b-rendah">Rendah</span>{% endif %}</td>
+        <td class="num" style="text-align:right;font-weight:600">{{ jumlah[p.zona] }}</td>
+        <td class="num" style="text-align:right">{{ '%.2f'|format(p.pct_desil1) }}</td>
+        <td class="num" style="text-align:right">{{ '%.2f'|format(p.pct_desil2) }}</td>
+        <td class="num" style="text-align:right">{{ '%.2f'|format(p.pct_desil3) }}</td>
+        <td class="num" style="text-align:right">{{ '%.2f'|format(p.pct_desil4) }}</td>
+        <td class="num" style="text-align:right">{{ '%.2f'|format(p.pct_desil5) }}</td>
+        <td class="num" style="text-align:right">{{ '%.2f'|format(p.pct_desil6_10) }}</td>
+        <td class="num" style="text-align:right">{{ '%.2f'|format(p.pct_belum_prmk) }}</td>
+        <td class="num" style="text-align:right">{{ '%.2f'|format(p.pct_nonaktif) }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h3>Catatan data</h3>
+  <div class="mini">
+    Sumber data DTSEN Kabupaten Lahat versi 20 Juli 2026, mencakup 372 desa di 24 kecamatan.
+    Desa Talang Jawa (Kecamatan Lahat) dikecualikan karena hanya memiliki satu keluarga yang seluruhnya
+    belum diperingkat, sehingga tidak memiliki profil desil yang dapat dianalisis. Data akhir 371 desa.
+    Tiga desa bernama serupa &mdash; Talang Jawa Selatan, Talang Jawa Utara, dan Talang Jawa di Kecamatan
+    Tanjungtebat &mdash; tetap disertakan karena datanya lengkap.
+  </div>
+</div>
+{% endblock %}

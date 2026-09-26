@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block judul %}{{ r.KELURAHAN }}{% endblock %}
+
+{% block isi %}
+<div class="head">
+  <h2>{{ r.KELURAHAN }}</h2>
+  <p>Kecamatan {{ r.KECAMATAN }} &middot; {{ '{:,.0f}'.format(r.JUMLAH_KELUARGA)|replace(',', '.') }} keluarga terdaftar</p>
+</div>
+
+<div class="grid g4">
+  <div class="stat"><div class="lbl">Peringkat prioritas</div><div class="val">{{ r.rank_topsis }}</div><div class="sup">dari {{ total }} desa</div></div>
+  <div class="stat"><div class="lbl">Skor TOPSIS</div><div class="val">{{ '%.4f'|format(r.skor_topsis) }}</div><div class="sup">rentang 0 sampai 1</div></div>
+  <div class="stat"><div class="lbl">Peringkat SAW</div><div class="val">{{ r.rank_saw }}</div><div class="sup">metode pembanding</div></div>
+  <div class="stat">
+    <div class="lbl">Zona kemiskinan</div>
+    <div style="margin-top:8px">
+      {% if r.zona=='Kemiskinan Tinggi' %}<span class="b b-tinggi">Tinggi</span>
+      {% elif r.zona=='Kemiskinan Sedang' %}<span class="b b-sedang">Sedang</span>
+      {% else %}<span class="b b-rendah">Rendah</span>{% endif %}
+    </div>
+    <div class="sup" style="margin-top:6px">hasil K-Means</div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Rekomendasi tindakan</h3>
+  <div class="ket">Ditentukan dari kombinasi zona kemiskinan dan jenis masalah dominan.</div>
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <span class="b {{ 'b-adm' if r.jenis_masalah=='Administratif' else 'b-eko' }}">Masalah {{ r.jenis_masalah }}</span>
+    <span style="font-size:15px;font-weight:500">{{ r.rekomendasi }}</span>
+  </div>
+  {% if r.jenis_masalah == 'Administratif' %}
+  <div class="mini" style="margin-top:11px">
+    Proporsi keluarga belum diperingkat di desa ini {{ '%.2f'|format(r.pct_belum_prmk) }}%,
+    berada di 25% teratas se-kabupaten (ambang {{ '%.2f'|format(info.ambang_belum) }}%).
+    Artinya masih ada keluarga yang belum dapat dijangkau program karena belum memiliki peringkat desil.
+  </div>
+  {% endif %}
+</div>
+
+<div class="grid g2">
+  <div class="card">
+    <h3>Profil kesejahteraan</h3>
+    <div class="ket">Delapan proporsi keluarga terhadap total keluarga desa.</div>
+    {% set semua = kriteria + ['pct_nonaktif'] %}
+    {% set nama = labels + ['Nonaktif'] %}
+    {% for k in semua %}
+    <div class="bar">
+      <span class="n">{{ nama[loop.index0] }}</span>
+      <span class="t"><span class="f" style="width:{{ (r[k] / 75 * 100)|round(1) }}%;
+        {% if k == 'pct_desil6_10' %}background:var(--rendah){% elif k in ['pct_desil1','pct_desil2'] %}background:var(--tinggi){% endif %}"></span></span>
+      <span class="p">{{ '%.2f'|format(r[k]) }}%</span>
+    </div>
+    {% endfor %}
+    <div class="mini" style="margin-top:10px">
+      Desil 1 dan 2 bersama-sama {{ '%.2f'|format(r.pct_desil1 + r.pct_desil2) }}% &mdash;
+      kelompok yang paling memerlukan prioritas intervensi.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Kedudukan dalam perankingan</h3>
+    <div class="ket">Perbandingan hasil dua metode pendukung keputusan.</div>
+    <table>
+      <tbody>
+        <tr><td class="mut">Peringkat TOPSIS</td><td class="num" style="text-align:right;font-weight:600">{{ r.rank_topsis }}</td></tr>
+        <tr><td class="mut">Skor TOPSIS</td><td class="num" style="text-align:right">{{ '%.6f'|format(r.skor_topsis) }}</td></tr>
+        <tr><td class="mut">Peringkat SAW</td><td class="num" style="text-align:right;font-weight:600">{{ r.rank_saw }}</td></tr>
+        <tr><td class="mut">Skor SAW</td><td class="num" style="text-align:right">{{ '%.6f'|format(r.skor_saw) }}</td></tr>
+        <tr><td class="mut">Selisih peringkat</td><td class="num" style="text-align:right">{{ (r.rank_topsis - r.rank_saw)|abs }}</td></tr>
+      </tbody>
+    </table>
+    <div class="mini" style="margin-top:11px">
+      {% set beda = (r.rank_topsis - r.rank_saw)|abs %}
+      {% if beda <= 5 %}Kedua metode sepakat menempatkan desa ini pada posisi yang hampir sama.
+      {% elif beda <= 25 %}Terdapat perbedaan sedang antara kedua metode.
+      {% else %}Kedua metode cukup berbeda menilai desa ini, perlu diperiksa profilnya lebih lanjut.{% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="tools">
+  <a href="{{ url_for('ranking') }}" class="btn">Kembali ke daftar peringkat</a>
+  <a href="{{ url_for('ranking', kec=r.KECAMATAN) }}" class="btn">Lihat desa lain di {{ r.KECAMATAN }}</a>
+</div>
+{% endblock %}

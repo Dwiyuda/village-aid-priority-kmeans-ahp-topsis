@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block judul %}SPK Prioritas Desa{% endblock %} — Kabupaten Lahat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% block kepala %}{% endblock %}
+</head>
+<body>
+<div class="wrap">
+
+  <aside class="side">
+    <h1>SPK Prioritas Desa</h1>
+    <div class="sub">Bantuan Sosial &middot; Kabupaten Lahat</div>
+    <nav>
+      <div class="grup">Ikhtisar</div>
+      <a href="{{ url_for('dashboard') }}" class="{% if halaman=='dashboard' %}on{% endif %}">Dashboard</a>
+      <a href="{{ url_for('clustering') }}" class="{% if halaman=='clustering' %}on{% endif %}">Hasil Clustering</a>
+
+      <div class="grup">Pendukung Keputusan</div>
+      <a href="{{ url_for('ahp') }}" class="{% if halaman=='ahp' %}on{% endif %}">Pembobotan AHP</a>
+      <a href="{{ url_for('ranking') }}" class="{% if halaman in ['ranking','detail'] %}on{% endif %}">Peringkat Prioritas</a>
+      <a href="{{ url_for('perbandingan') }}" class="{% if halaman=='perbandingan' %}on{% endif %}">TOPSIS vs SAW</a>
+
+      <div class="grup">Laporan</div>
+      <a href="{{ url_for('ekspor_csv') }}">Unduh CSV</a>
+      <a href="{{ url_for('ekspor_pdf') }}" id="lnk-pdf">Unduh PDF</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    {% with pesan = get_flashed_messages(with_categories=true) %}
+      {% for kat, isi in pesan %}
+        <div class="flash flash-{{ kat }}">{{ isi }}</div>
+      {% endfor %}
+    {% endwith %}
+    {% block isi %}{% endblock %}
+  </main>
+
+</div>
+
+<script>
+document.getElementById('lnk-pdf').addEventListener('click', function(){
+  var a = this, t = a.textContent;
+  a.textContent = 'Menyiapkan PDF...';
+  setTimeout(function(){ a.textContent = t; }, 4000);
+});
+</script>
+{% block skrip %}{% endblock %}
+</body>
+</html>

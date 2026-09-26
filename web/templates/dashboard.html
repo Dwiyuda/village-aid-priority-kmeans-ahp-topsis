@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block judul %}Dashboard{% endblock %}
+
+{% block isi %}
+<div class="head">
+  <h2>Dashboard</h2>
+  <p>Ringkasan prioritas desa penerima bantuan sosial berdasarkan data DTSEN Kabupaten Lahat.</p>
+</div>
+
+<div class="grid g4">
+  <div class="stat"><div class="lbl">Desa dianalisis</div><div class="val">{{ n_desa }}</div><div class="sup">dari 372 desa, 1 dikecualikan</div></div>
+  <div class="stat"><div class="lbl">Kecamatan</div><div class="val">{{ n_kec }}</div><div class="sup">seluruh Kabupaten Lahat</div></div>
+  <div class="stat"><div class="lbl">Rasio konsistensi</div><div class="val">{{ '%.4f'|format(info.cr) }}</div><div class="sup">{{ 'konsisten' if info.konsisten else 'perlu diperbaiki' }}</div></div>
+  <div class="stat"><div class="lbl">Kesepakatan metode</div><div class="val">{{ '%.4f'|format(info.korelasi) }}</div><div class="sup">korelasi TOPSIS &amp; SAW</div></div>
+</div>
+
+<div class="grid g3" style="margin-top:14px">
+  <div class="stat" style="border-left:3px solid var(--tinggi)">
+    <div class="lbl">Kemiskinan tinggi</div>
+    <div class="val">{{ zona['Kemiskinan Tinggi'] }}</div><div class="sup">desa</div>
+  </div>
+  <div class="stat" style="border-left:3px solid var(--sedang)">
+    <div class="lbl">Kemiskinan sedang</div>
+    <div class="val">{{ zona['Kemiskinan Sedang'] }}</div><div class="sup">desa</div>
+  </div>
+  <div class="stat" style="border-left:3px solid var(--rendah)">
+    <div class="lbl">Kemiskinan rendah</div>
+    <div class="val">{{ zona['Kemiskinan Rendah'] }}</div><div class="sup">desa</div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Lima desa prioritas teratas</h3>
+  <div class="ket">Diurutkan berdasarkan skor TOPSIS dengan bobot AHP yang sedang aktif.</div>
+  <table>
+    <thead><tr><th>#</th><th>Desa</th><th>Kecamatan</th><th>Zona</th><th>Masalah</th><th style="text-align:right">Skor</th></tr></thead>
+    <tbody>
+    {% for r in top %}
+      <tr>
+        <td class="rank">{{ r.rank_topsis }}</td>
+        <td><a href="{{ url_for('detail', kec=r.KECAMATAN, desa=r.KELURAHAN) }}">{{ r.KELURAHAN }}</a></td>
+        <td class="mut">{{ r.KECAMATAN }}</td>
+        <td>{% if r.zona=='Kemiskinan Tinggi' %}<span class="b b-tinggi">Tinggi</span>
+            {% elif r.zona=='Kemiskinan Sedang' %}<span class="b b-sedang">Sedang</span>
+            {% else %}<span class="b b-rendah">Rendah</span>{% endif %}</td>
+        <td><span class="b {{ 'b-adm' if r.jenis_masalah=='Administratif' else 'b-eko' }}">{{ r.jenis_masalah }}</span></td>
+        <td class="num" style="text-align:right;font-weight:600">{{ '%.4f'|format(r.skor_topsis) }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div style="margin-top:14px"><a href="{{ url_for('ranking') }}" class="btn">Lihat seluruh {{ n_desa }} desa</a></div>
+</div>
+
+<div class="grid g2">
+  <div class="card">
+    <h3>Bobot kriteria aktif</h3>
+    <div class="ket">Hasil AHP, dipakai untuk perankingan saat ini.</div>
+    {% for l in labels %}
+    <div class="bar">
+      <span class="n">{{ l }}</span>
+      <span class="t"><span class="f" style="width:{{ (info.bobot[loop.index0] / info.bobot|max * 100)|round(1) }}%"></span></span>
+      <span class="p">{{ '%.1f'|format(info.bobot[loop.index0]*100) }}%</span>
+    </div>
+    {% endfor %}
+    <div style="margin-top:12px"><a href="{{ url_for('ahp') }}" class="btn">Ubah pembobotan</a></div>
+  </div>
+
+  <div class="card">
+    <h3>Kecamatan paling prioritas</h3>
+    <div class="ket">Rata-rata skor prioritas seluruh desa di kecamatan tersebut.</div>
+    {% set maks = per_kec.values()|max %}
+    {% for k, v in per_kec.items() %}
+    <div class="bar">
+      <span class="n">{{ k }}</span>
+      <span class="t"><span class="f" style="width:{{ (v / maks * 100)|round(1) }}%"></span></span>
+      <span class="p">{{ '%.4f'|format(v) }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card">
+  <h3>Jenis masalah dominan</h3>
+  <div class="ket">Desa ditandai bermasalah administratif bila proporsi keluarga belum diperingkat berada di 25% teratas se-kabupaten (ambang {{ '%.2f'|format(info.ambang_belum) }}%).</div>
+  <div class="grid g2">
+    <div class="stat"><div class="lbl">Ekonomi</div><div class="val">{{ masalah.get('Ekonomi', 0) }}</div><div class="sup">butuh bantuan tunai atau pemberdayaan</div></div>
+    <div class="stat"><div class="lbl">Administratif</div><div class="val">{{ masalah.get('Administratif', 0) }}</div><div class="sup">butuh survei dan pemutakhiran data</div></div>
+  </div>
+</div>
+{% endblock %}

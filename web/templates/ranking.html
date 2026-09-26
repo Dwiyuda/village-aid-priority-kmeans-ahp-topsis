@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block judul %}Peringkat Prioritas{% endblock %}
+
+{% block isi %}
+<div class="head">
+  <h2>Peringkat Prioritas Desa</h2>
+  <p>Urutan berdasarkan skor TOPSIS dengan bobot AHP aktif (CR {{ '%.4f'|format(info.cr) }}).</p>
+</div>
+
+<div class="card">
+  <form method="get" class="tools" style="margin-bottom:0">
+    <input type="text" name="cari" value="{{ f.cari }}" placeholder="Cari nama desa" style="width:190px">
+    <select name="kec">
+      <option value="">Semua kecamatan</option>
+      {% for k in kecamatan %}
+      <option value="{{ k }}" {% if f.kec==k %}selected{% endif %}>{{ k }}</option>
+      {% endfor %}
+    </select>
+    <select name="zona">
+      <option value="">Semua zona</option>
+      {% for z in ['Kemiskinan Tinggi','Kemiskinan Sedang','Kemiskinan Rendah'] %}
+      <option value="{{ z }}" {% if f.zona==z %}selected{% endif %}>{{ z }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn-p">Terapkan</button>
+    <a href="{{ url_for('ranking') }}" class="btn">Reset</a>
+    <div class="spacer"></div>
+    <span class="mini">{{ total }} desa</span>
+    <a class="btn" href="{{ url_for('ekspor_csv', kec=f.kec, zona=f.zona) }}">Unduh CSV</a>
+  </form>
+</div>
+
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th><th>Desa</th><th>Kecamatan</th><th>Zona</th>
+        <th style="text-align:right">%D1</th>
+        <th style="text-align:right">%D2</th>
+        <th style="text-align:right">%Belum</th>
+        <th style="text-align:right">Skor</th>
+        <th>Masalah</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for r in rows %}
+      <tr>
+        <td class="rank">{{ r.rank_topsis }}</td>
+        <td><a href="{{ url_for('detail', kec=r.KECAMATAN, desa=r.KELURAHAN) }}">{{ r.KELURAHAN }}</a></td>
+        <td class="mut">{{ r.KECAMATAN }}</td>
+        <td>{% if r.zona=='Kemiskinan Tinggi' %}<span class="b b-tinggi">Tinggi</span>
+            {% elif r.zona=='Kemiskinan Sedang' %}<span class="b b-sedang">Sedang</span>
+            {% else %}<span class="b b-rendah">Rendah</span>{% endif %}</td>
+        <td class="num" style="text-align:right">{{ '%.2f'|format(r.pct_desil1) }}</td>
+        <td class="num" style="text-align:right">{{ '%.2f'|format(r.pct_desil2) }}</td>
+        <td class="num" style="text-align:right">{{ '%.2f'|format(r.pct_belum_prmk) }}</td>
+        <td class="num" style="text-align:right;font-weight:600">{{ '%.4f'|format(r.skor_topsis) }}</td>
+        <td><span class="b {{ 'b-adm' if r.jenis_masalah=='Administratif' else 'b-eko' }}">{{ r.jenis_masalah }}</span></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="9" class="mut" style="text-align:center;padding:26px">Tidak ada desa yang cocok dengan penyaring.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
